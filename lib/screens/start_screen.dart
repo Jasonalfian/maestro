@@ -36,7 +36,7 @@ class _StartScreenState extends State<StartScreen>
                 height: 60,
                 child: ZoomIn(
                   duration: Duration(seconds: 1),
-                  child: Text('Are you ready to make your own lyrics ?',
+                  child: Text('Are you ready to make your own lyrics?',
                     style: TextStyle(
                         fontFamily: 'NunitoSans',
                         fontWeight: FontWeight.bold,

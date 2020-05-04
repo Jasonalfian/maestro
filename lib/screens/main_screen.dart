@@ -1,9 +1,11 @@
+import 'dart:io' as DartIO;
 import 'package:flutter/material.dart';
 import 'package:maestro/components/constants.dart';
 import 'package:maestro/components/rounded_button.dart';
 import 'package:maestro/services/result.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -20,6 +22,7 @@ const List<String> sumResult = [
 ];
 
 class _MainScreenState extends State<MainScreen> {
+  FlutterTts flutterTts;
 
   String input;
   String result = "first try";
@@ -35,7 +38,8 @@ class _MainScreenState extends State<MainScreen> {
       if(resultData==null){
         result="There's been an error, please try again.";
         return;
-      } result = resultData['generated_text'];
+      }
+      result = input + " " + resultData['generated_text'];
       isFirst = false;
       listString = result.split(' ');
       tempResult = concatString(sumShowResult, listString);
@@ -89,8 +93,30 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
+    flutterTts = FlutterTts();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    flutterTts.stop();
+  }
+
+  Future _speak() async {
+    if (result != null) {
+      if (result.isNotEmpty) {
+        await flutterTts.setVolume(1.0);
+        await flutterTts.setSpeechRate(0.4);
+        await flutterTts.setPitch(1.0);
+
+        if (DartIO.Platform.isIOS) {
+          await flutterTts.setSharedInstance(false);
+        }
+
+        await flutterTts.speak(tempResult);
+      }
+    }
   }
 
   @override
@@ -113,138 +139,154 @@ class _MainScreenState extends State<MainScreen> {
             textAlign: TextAlign.center,
           ),
         ),
-        body: SafeArea(
-          child: Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                  image: AssetImage("images/bgmain.png"), fit: BoxFit.cover),
-            ),
-            constraints: BoxConstraints.expand(),
-            child: Padding(
-              padding: EdgeInsets.only(left: 20,right: 20,top: 35,bottom: 20),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    Column(
-                      children: <Widget>[
-                        Container(
-                            color: Colors.white,
-                            width: 330,
-                            height: 30,
-                            child: Text(
-                              "Hey, let's make your song's lyric !",
-                              style: TextStyle(
-                                  fontFamily: 'NunitoSans',
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                  fontSize: 20),
-                              textAlign: TextAlign.left,
-                            )),
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          child: Row(
-                            children: <Widget>[
-                              Flexible(
-                                flex: 5,
-                                child: TextField(
-                                  keyboardType: TextInputType.emailAddress,
-                                  textAlign: TextAlign.center,
-                                  onChanged: (value) {
-                                    input=value;
-                                  },
-                                  style: TextStyle(color: Colors.black),
-                                  decoration: kTextFieldDecoration.copyWith(
-                                      hintText: 'Input your text'
+        body: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+                image: AssetImage("images/bgmain.png"), fit: BoxFit.cover),
+          ),
+          child: SafeArea(
+            child: Container(
+              constraints: BoxConstraints.expand(),
+              child: Padding(
+                padding: EdgeInsets.only(left: 20,right: 20,top: 35,bottom: 20),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Column(
+                        children: <Widget>[
+                          Container(
+                              width: 330,
+                              height: 30,
+                              child: Text(
+                                "Hey, let's make your song's lyrics!",
+                                style: TextStyle(
+                                    fontFamily: 'NunitoSans',
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                    fontSize: 20),
+                                textAlign: TextAlign.left,
+                              )),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 10),
+                            child: Row(
+                              children: <Widget>[
+                                Flexible(
+                                  flex: 5,
+                                  child: TextField(
+                                    keyboardType: TextInputType.text,
+                                    textAlign: TextAlign.center,
+                                    onChanged: (value) {
+                                      input=value;
+                                    },
+                                    style: TextStyle(color: Colors.black),
+                                    decoration: kTextFieldDecoration.copyWith(
+                                        hintText: 'Input your text'
+                                    ),
                                   ),
                                 ),
-                              ),
-                              Flexible(
-                                flex: 2,
-                                child: RoundedButton(
-                                  colour: Color(0xff8269E8),
-                                  size: 15,
-                                  title: 'Start',
-                                  normal: false,
-                                  onPressed: () async{
-                                    setState(() {
-                                      showSpinner=true;
-                                    });
+                                Flexible(
+                                  flex: 2,
+                                  child: RoundedButton(
+                                    colour: Color(0xff8269E8),
+                                    size: 15,
+                                    title: 'Start',
+                                    normal: false,
+                                    onPressed: () async{
+                                      setState(() {
+                                        showSpinner=true;
+                                      });
                                       var rawResult = await generateLyrics.getLyrics(input, 300);
                                       updateUI(rawResult);
                                       setState(() {
                                         showSpinner=false;
                                       });
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Column(
+                        children: <Widget>[
+                          Container(
+                              width: 330,
+                              height: 35,
+                              child: Text(
+                                "Here's your lyrics!",
+                                style: TextStyle(
+                                    fontFamily: 'NunitoSans',
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                    fontSize: 20),
+                                textAlign: TextAlign.left,
+                              )),
+                          Container(
+                            height: 360,
+                            width: 330,
+                            padding: EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Color(0xff8269E8), width: 2.0),
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            child: isFirst ? Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Opacity(
+                                  opacity: 0.5,
+                                  child: CircleAvatar(
+                                    radius: 100,
+                                    backgroundColor: Colors.transparent,
+                                    backgroundImage: AssetImage("images/logobaru.png"),
+                                  ),
+                                )
+                              ],
+                            ) : SelectableText(
+                              tempResult, textAlign: TextAlign.justify,
+                            ),
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          Column(
+                            children: <Widget>[
+                              Container(
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Color(0xff8269E8), width: 2.0),
+                                  borderRadius: BorderRadius.circular(7.0),
+                                ),
+                                child: iOSPicker(),
+                              ),
+                              Container(height: 8),
+                              Container(
+                                height: 50,
+                                child: RoundedButton(
+                                  colour: Color(0xff8269E8),
+                                  title: 'Speak',
+                                  normal: true,
+                                  onPressed: () async{
+                                    _speak();
                                   },
                                 ),
                               ),
+                              Container(height: 16),
                             ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    Column(
-                      children: <Widget>[
-                        Container(
-                          color: Colors.white,
-                            width: 330,
-                            height: 35,
-                            child: Text(
-                              "Here's your lyrics !",
-                              style: TextStyle(
-                                  fontFamily: 'NunitoSans',
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                  fontSize: 20),
-                              textAlign: TextAlign.left,
-                            )),
-                        Container(
-                          height: 360,
-                          width: 330,
-                          padding: EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Color(0xff8269E8), width: 2.0),
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                          child: isFirst ? Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                            Opacity(
-                              opacity: 0.5,
-                              child: CircleAvatar(
-                              radius: 100,
-                              backgroundColor: Colors.transparent,
-                              backgroundImage: AssetImage("images/logobaru.png"),
-                          ),
-                            )
-                            ],
-                          ) : SelectableText(
-                            tempResult, textAlign: TextAlign.justify,
-                          ),
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        Container(
-                          height: 50,
-                          width: 100,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Color(0xff8269E8), width: 2.0),
-                            borderRadius: BorderRadius.circular(7.0),
-                          ),
-                          child: iOSPicker(),
-                        ),
-                      ],
-                    ),
-                  ],
+                          )
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
+        )
       ),
     );
   }
