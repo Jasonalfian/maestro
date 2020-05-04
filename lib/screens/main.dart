@@ -4,7 +4,7 @@ import 'package:maestro/screens/start_screen.dart';
 import 'package:maestro/screens/main_screen.dart';
 import 'package:page_transition/page_transition.dart';
 
-//void main() => runApp(Maestro());
+void main() => runApp(Maestro());
 
 class Maestro extends StatelessWidget {
 

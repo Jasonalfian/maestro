@@ -28,6 +28,7 @@ class _MainScreenState extends State<MainScreen> {
   String result = "first try";
   String tempResult;
   int sumShowResult = 50;
+  bool isSpeak = false;
   bool showSpinner= false;
   bool isFirst=true;
   var listString;
@@ -67,7 +68,6 @@ class _MainScreenState extends State<MainScreen> {
       backgroundColor: Color(0xff8269E8),
       itemExtent: 20.0,
       onSelectedItemChanged: (selectedIndex) async {
-        var selectedCrypto = sumResult[selectedIndex];
         print(selectedIndex);
         sumShowResult=(50*selectedIndex)+50;
         if(isFirst){
@@ -117,6 +117,10 @@ class _MainScreenState extends State<MainScreen> {
         await flutterTts.speak(tempResult);
       }
     }
+  }
+
+  Future _stop() async{
+    await flutterTts.stop();
   }
 
   @override
@@ -193,14 +197,17 @@ class _MainScreenState extends State<MainScreen> {
                                     title: 'Start',
                                     normal: false,
                                     onPressed: () async{
-                                      setState(() {
-                                        showSpinner=true;
-                                      });
-                                      var rawResult = await generateLyrics.getLyrics(input, 300);
-                                      updateUI(rawResult);
-                                      setState(() {
-                                        showSpinner=false;
-                                      });
+                                      if(input!=null) {
+                                        setState(() {
+                                          showSpinner = true;
+                                        });
+                                        var rawResult = await generateLyrics
+                                            .getLyrics(input, 300);
+                                        updateUI(rawResult);
+                                        setState(() {
+                                          showSpinner = false;
+                                        });
+                                      }
                                     },
                                   ),
                                 ),
@@ -227,7 +234,7 @@ class _MainScreenState extends State<MainScreen> {
                                 textAlign: TextAlign.left,
                               )),
                           Container(
-                            height: 360,
+                            height: 310,
                             width: 330,
                             padding: EdgeInsets.all(10),
                             decoration: BoxDecoration(
@@ -242,7 +249,7 @@ class _MainScreenState extends State<MainScreen> {
                                   child: CircleAvatar(
                                     radius: 100,
                                     backgroundColor: Colors.transparent,
-                                    backgroundImage: AssetImage("images/logobaru.png"),
+                                    backgroundImage: AssetImage("images/logobaru2.gif"),
                                   ),
                                 )
                               ],
@@ -251,28 +258,36 @@ class _MainScreenState extends State<MainScreen> {
                             ),
                           ),
                           SizedBox(
-                            height: 20,
+                            height: 15,
                           ),
                           Column(
                             children: <Widget>[
                               Container(
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Color(0xff8269E8), width: 2.0),
-                                  borderRadius: BorderRadius.circular(7.0),
-                                ),
-                                child: iOSPicker(),
-                              ),
-                              Container(height: 8),
-                              Container(
-                                height: 50,
+                                height: 55,
+                                width: 330,
                                 child: RoundedButton(
                                   colour: Color(0xff8269E8),
-                                  title: 'Speak',
+                                  title: isSpeak ? 'Stop' : 'Speak',
+                                  size: 16,
                                   normal: true,
                                   onPressed: () async{
-                                    _speak();
+                                    isSpeak ? _stop() : _speak();
+                                    setState(() {
+                                      isSpeak = !isSpeak;
+                                    });
                                   },
+                                ),
+                              ),
+                              Container(height: 10),
+                              Center(
+                                child: Container(
+                                  height: 50,
+                                  width: 100,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Color(0xff8269E8), width: 2.0),
+                                    borderRadius: BorderRadius.circular(7.0),
+                                  ),
+                                  child: iOSPicker(),
                                 ),
                               ),
                               Container(height: 16),

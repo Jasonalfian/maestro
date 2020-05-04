@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:flutter_gifimage/flutter_gifimage.dart';
 
 class LogoScreen extends StatefulWidget {
   @override
@@ -58,7 +59,7 @@ class _LogoScreenState extends State<LogoScreen> {
                       child: CircleAvatar(
                         radius: 125,
                         backgroundColor: Colors.transparent,
-                        backgroundImage: AssetImage("images/logobaru.png"),
+                        backgroundImage: AssetImage("images/logobaru2.gif"),
                       ),
                     ),
                   ),
